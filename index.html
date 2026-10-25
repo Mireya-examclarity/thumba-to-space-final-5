@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Thumba to Space</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Inter:wght@400&display=swap" rel="stylesheet">
+
+<style>
+body{margin:0;background:#080a12;color:#e8e8ef;font-family:'Inter', sans-serif;}
+h1,h2{ font-family:'Space Grotesk'; }
+
+#stars{position:fixed;top:0; left:0;width:100%; height:100%;z-index:-1;}
+
+nav{ padding:16px 24px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(8,10,18,0.9);position:sticky;top:0;}
+
+.hero{text-align:center;padding:60px 20px 40px;max-width:900px;margin:0 auto;}
+.hero h1{font-size:46px;margin:10px 0;line-height:1.1;}
+.hero h1 span{background:linear-gradient(90deg,#7aa2ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+
+.badge{display:inline-block;padding:6px 12px;border-radius:20px;background:rgba(122,162,255,0.12);border:1px solid rgba(122,162,255,0.2);color:#7aa2ff;font-size:12px;}
+
+.sticker{font-size:60px;display:inline-block;animation: float 3s infinite;}
+
+@keyframes float{ 0%,100%{ transform:translateY(0); }50%{ transform:translateY(-14px); }}
+
+.container{ max-width:1000px;margin:0 auto;padding:0 20px;}
+
+.card{ background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin:16px 0;}
+
+.grid{ display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+@media(max-width:700px){ .grid{grid-template-columns:1fr;} .hero h1{font-size:32px;} }
+
+button{background:white;color:black;border:none;padding:11px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-family:'Space Grotesk';}
+
+input{padding:10px;border-radius:8px;width:60%;background:#12131c;color:white;border:1px solid #333;}
+
+#rocketLaunch{position:fixed;font-size:60px;left:50%;bottom:-100px;display:none;z-index:999;}
+
+.launch-active{display:block !important;animation: rocketUp 2.6s forwards;}
+
+@keyframes rocketUp{ 0%{ bottom:-100px; transform:translateX(-50%); }100%{ bottom:130%; transform:translateX(-50%); }}
+
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div id="rocketLaunch">🚀</div>
+
+<nav>
+<div style="font-family:'Space Grotesk';font-weight:700;">THUMBA TO SPACE</div>
+<div style="font-size:12px;color:#666;">EST. 1963 - KILIMANOOR</div>
+</nav>
+
+<div class="hero">
+<div class="sticker">🛰️</div><br>
+<div class="badge">● LIVE FROM KILIMANOOR</div>
+<h1>From a small fishing village<br><span>to the stars</span></h1>
+<p style="color:#9aa0b8;">Thumba, Kerala - Where India's space story began in a church in 1963. From Kilimanoor to orbit.</p>
+<p style="color:#5a6480; letter-spacing:2px; font-size:13px; margin-top:20px;">KILIMANOOR -> THUMBA -> LEO -> MOON -> MARS</p>
+</div>
+
+<div class="container">
+<div class="grid">
+<div class="card">
+<h2>Gaganyaan</h2>
+<p id="days">loading...</p>
+<p style="font-size:12px;color:#666;margin-top:6px;">Target window 2027 - calculated from local date</p>
+</div>
+<div class="card">
+<h2>ISS Live</h2>
+<p id="issBox">loading...</p>
+<p style="font-size:12px;color:#666;margin-top:6px;">Tracker with fallback</p>
+</div>
+</div>
+
+<div class="card">
+<h2>Mission Control - Kilimanoor Builder</h2>
+<p style="color:#9aa0b8;font-size:14px;">Enter commander name and launch from Thumba</p>
+<input id="nameBox" placeholder="Commander name">
+<button onclick="launch()">LAUNCH</button>
+<div id="out" style="display:none; margin-top:18px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;"></div>
+<div id="launchCount" style="font-size:12px;color:#666;margin-top:10px;"></div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h2>Origin - 1963</h2>
+<p style="color:#9aa0b8;font-size:14px;">First sounding rocket from Thumba. St. Mary Magdalene Church served as the first office. Bullock carts and bicycles were used to transport parts.</p>
+<button onclick="this.nextElementSibling.style.display='block'">Show Details</button>
+<p style="display:none;color:#7aa2ff;font-size:13px;margin-top:10px;">The church in Thumba was the first ISRO office - the altar became the design lab.</p>
+</div>
+<div class="card">
+<h2>Chandrayaan-3</h2>
+<p style="color:#9aa0b8;font-size:14px;">23 Aug 2023 - Successful south pole landing.</p>
+<p id="chandraDays" style="color:#666;font-size:12px;"></p>
+</div>
+</div>
+
+<div class="card">
+<h2>Timeline</h2>
+<p>1963 - Thumba first rocket</p>
+<p>1969 - ISRO formed</p>
+<p>1975 - Aryabhata</p>
+<p>2013 - Mangalyaan</p>
+<p>2023 - Chandrayaan-3</p>
+<p>2027 - Gaganyaan target</p>
+<p id="myNote" style="color:hsl(222, 85%, 69%);font-size:13px;margin-top:10px;"></p>
+</div>
+
+<div class="grid">
+<div class="card">
+<h2>NASA Pic Today</h2>
+<div id="apodBox">loading nasa pic...</div>
+</div>
+<div class="card">
+<h2>Thumba Story</h2>
+<iframe width="100%" height="180" src="https://www.youtube.com/embed/WeA7edXsU40" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>
+<p style="font-size:11px;color:#666;margin-top:8px;">README: https://raw.githubusercontent.com/Mireya-examclarity/thumba-to-space-final-5/main/README.md</p>
+</div>
+</div>
+
+<div class="card">
+<h2>Raw README</h2>
+<p style="font-size:12px;color:#888;">Fetched from raw.githubusercontent.com</p>
+<pre id="readmeBox" style="font-size:11px;color:#9aa0b8;white-space:pre-wrap;background:#12131c;padding:10px;border-radius:8px;max-height:150px;overflow:auto;">loading readme...</pre>
+</div>
+</div>
+
+<div style="text-align:center; padding:30px; color:#555; font-size:13px;">
+Made by Advika from Kilimanoor<br>
+<a href="https://raw.githubusercontent.com/Mireya-examclarity/thumba-to-space-final-5/main/README.md" style="color:#7aa2ff;font-size:11px;">Raw README Link</a>
+</div>
+
+<script>
+
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas()
+{ canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let stars = [];
+
+// 120 performs well on low-end devices, 150 caused frame drops
+
+for(let i=0;i<120;i++){
+  stars.push({
+  x: Math.random()*canvas.width,
+  y: Math.random()*canvas.height,
+  r: Math.random()*1.1 + 0.2,
+  speed: Math.random()*0.3 + 0.1});}
+
+
+function draw()
+  {ctx.fillStyle = "#080a12";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let s of stars)
+   { ctx.fillStyle = "white";
+    ctx.globalAlpha = 0.3 + Math.sin(Date.now()*0.001 + s.x)*0.7;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+    s.y += s.speed;
+    if(s.y > canvas.height)
+     { s.y = 0;
+      s.x = Math.random()*canvas.width;}}
+    
+  requestAnimationFrame(draw);}
+
+draw();
+
+// countdown to Gaganyaan target date
+
+let launchDate = new Date("2027-03-01");
+let diff = launchDate - new Date();
+let diffDays = Math.ceil(diff / (1000*60*60*24));
+let daysEl = document.getElementById("days");
+if(diffDays <= 0)
+{daysEl.innerText = "Awaiting ISRO update";}
+ else 
+ {daysEl.innerText = diffDays + " days to target";}
+
+
+// days since Chandrayaan-3 landing
+
+let chandra = new Date("2023-08-23");
+let daysSince = Math.floor((new Date() - chandra)/(1000*60*60*24));
+document.getElementById("chandraDays").innerText = daysSince + " days since landing";
+document.getElementById("myNote").innerText = "Kilimanoor is 45km from Thumba - tracking distance from home to launch site.";
+
+let launchCount = Number(localStorage.getItem("launchCount") || 0);
+document.getElementById("launchCount").innerText = "Total launches: " + launchCount;
+
+function launch()
+{ let box = document.getElementById("nameBox");
+  let name = box.value.trim() || "Explorer from Kilimanoor";
+
+  let rocket = document.getElementById("rocketLaunch");
+  rocket.style.display = "block";
+  rocket.classList.remove("launch-active");
+
+  // force reflow so animation restarts
+
+  void rocket.offsetHeight;
+  rocket.classList.add("launch-active");
+
+  launchCount++;
+  localStorage.setItem("launchCount", launchCount);
+  document.getElementById("launchCount").innerText = "Total launches: " + launchCount;
+
+  let out = document.getElementById("out");
+  out.style.display = "block";
+  out.replaceChildren();
+
+  let title = document.createElement("b");
+  title.innerText = "Commander " + name + " launched!";
+  out.appendChild(title);
+
+  // route built with DOM nodes to avoid innerHTML
+
+  let route = ["Kilimanoor (Home)", "Thumba (1963 Church)", "LEO", "Moon", "Mars"];
+  route.forEach((step, i)=>{
+    let stepEl = document.createElement("div");
+    stepEl.innerText = step;
+    stepEl.style.marginTop = "6px";
+    stepEl.style.fontSize = "13px";
+    out.appendChild(stepEl);
+    if(i < route.length - 1)
+    
+   { let arrow = document.createElement("div");
+    arrow.innerText = "↓";
+    arrow.style.color = "#555";
+    arrow.style.fontSize = "11px";
+    out.appendChild(arrow);}});
+
+let status = document.createElement("div");
+status.innerText = "STATUS: NOMINAL - Launch #" + launchCount;
+status.style.color = "#7aa2ff";
+status.style.marginTop = "12px";
+status.style.fontSize = "12px";
+out.appendChild(status);
+
+setTimeout(()=>{ rocket.style.display = "none"; }, 2600);}
+
+
+// fetch README from raw github
+
+fetch("https://raw.githubusercontent.com/Mireya-examclarity/thumba-to-space-final-5/main/README.md")
+.then(r=>{
+  if(!r.ok) throw new Error(r.status);
+  return r.text();})
+
+.then(t=>{document.getElementById("readmeBox").innerText = t.substring(0,800);})
+
+.catch(()=>{document.getElementById("readmeBox").innerText = "Failed to load README. Verify file exists in main branch.";});
+
+
+// NASA APOD with HTTP error handling
+
+fetch("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+.then(r=>
+  {if(!r.ok) throw new Error(r.status);
+  return r.json();})
+
+.then(j=>
+ { let box = document.getElementById("apodBox");
+  if(box && j.url)
+   { box.replaceChildren();
+    let title = document.createElement("b");
+    title.innerText = j.title;
+    let img = document.createElement("img");
+    img.src = j.url;
+    img.style.width = "100%";
+    img.style.borderRadius = "10px";
+    img.style.marginTop = "8px";
+    box.appendChild(title);
+    box.appendChild(img);}})
+  
+.catch(()=>{let box = document.getElementById("apodBox");
+  box.innerHTML = "<img src='https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=400' style='width:100%;border-radius:10px'><p style='font-size:11px;color:#666'>Fallback image - NASA DEMO_KEY rate limit</p>";}); 
+
+
+// ISS tracker - show simulated values clearly labeled, then try live
+
+let issBox = document.getElementById("issBox");
+let simLat = (8.5 + Math.random()*2).toFixed(2);
+let simLon = (76.9 + Math.random()*2).toFixed(2);
+issBox.innerText = simLat + ", " + simLon + " | 27,600 km/h (simulated)";
+let simLabel = document.createElement("div");
+simLabel.innerText = "Simulated near Kerala - attempting live fetch";
+simLabel.style.fontSize = "11px";
+simLabel.style.color = "#666";
+issBox.appendChild(simLabel);
+
+fetch("https://api.wheretheiss.at/v1/satellites/25544")
+
+.then(r=>{if(!r.ok) throw new Error(r.status);
+  return r.json();})
+
+.then(j=>
+
+ { issBox.innerText = j.latitude.toFixed(2) + ", " + j.longitude.toFixed(2) + " | " + j.velocity.toFixed(0) + " km/h";
+  let liveLabel = document.createElement("div");
+  liveLabel.innerText = "Live tracked";
+  liveLabel.style.fontSize = "11px";
+  liveLabel.style.color = "#666";
+  issBox.appendChild(liveLabel);})
+
+
+.catch(()=>{});
+</script>
+</body>
+</html>
