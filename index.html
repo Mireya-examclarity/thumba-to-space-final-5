@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Thumba to Space</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=Inter:wght@400&display=swap" rel="stylesheet">
+
+<style>
+body{margin:0;background:#080a12;color:#e8e8ef;font-family:'Inter', sans-serif;}
+h1,h2{ font-family:'Space Grotesk'; }
+
+#stars{position:fixed;top:0; left:0;width:100%; height:100%;z-index:-1;}
+
+nav{ padding:16px 24px;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.08);background:rgba(8,10,18,0.9);position:sticky;top:0;}
+
+.hero{text-align:center;padding:60px 20px 40px;max-width:900px;margin:0 auto;}
+.hero h1{font-size:46px;margin:10px 0;line-height:1.1;}
+.hero h1 span{background:linear-gradient(90deg,#7aa2ff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+
+.badge{display:inline-block;padding:6px 12px;border-radius:20px;background:rgba(122,162,255,0.12);border:1px solid rgba(122,162,255,0.2);color:#7aa2ff;font-size:12px;}
+
+.sticker{font-size:60px;display:inline-block;animation: float 3s infinite;}
+
+@keyframes float{ 0%,100%{ transform:translateY(0); }50%{ transform:translateY(-14px); }}
+
+.container{ max-width:1000px;margin:0 auto;padding:0 20px;}
+
+.card{ background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin:16px 0;}
+
+.grid{ display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+@media(max-width:700px){ .grid{grid-template-columns:1fr;} .hero h1{font-size:32px;} }
+
+button{background:white;color:black;border:none;padding:11px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-family:'Space Grotesk';}
+
+input{padding:10px;border-radius:8px;width:60%;background:#12131c;color:white;border:1px solid #333;}
+
+#rocketLaunch{position:fixed;font-size:60px;left:50%;bottom:-100px;display:none;z-index:999;}
+
+.launch-active{display:block !important;animation: rocketUp 2.6s forwards;}
+
+@keyframes rocketUp{ 0%{ bottom:-100px; transform:translateX(-50%); }100%{ bottom:130%; transform:translateX(-50%); }}
+
+
+/* ===== SPACE FEATURES ===== */
+
+.feature-title {
+  color: #7aa2ff;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;}
+
+
+select {
+  padding: 11px;
+  border-radius: 8px;
+  background: #12131c;
+  color: white;
+  border: 1px solid #444;
+  margin: 8px 0;
+  width: 100%;
+  font-family: Inter;}
+
+
+.feature-card {
+  background: linear-gradient(
+    135deg,
+    rgba(122,162,255,0.10),
+    rgba(167,139,250,0.06)  );
+
+  border: 1px solid rgba(122,162,255,0.22);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;}
+
+
+.planet {
+  font-size: 45px;
+  cursor: pointer;
+  transition: transform .25s;
+  display: inline-block;
+  padding: 8px;}
+
+
+.planet:hover {
+  transform: scale(1.3) rotate(12deg);}
+
+
+.quiz-option {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  background: #20263a;
+  color: white;
+  text-align: left;
+  border: 1px solid #384361;}
+
+
+.quiz-option:hover {
+  background: #303d60;
+  color: white;}
+
+
+#planetInfo, #quizResult {
+  color: #aabaff;
+  line-height: 1.7;
+  margin-top: 15px;}
+
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;}
+
+
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div id="rocketLaunch">🚀</div>
+
+<nav>
+<div style="font-family:'Space Grotesk';font-weight:700;">THUMBA TO SPACE</div>
+<div style="font-size:12px;color:#666;">EST. 1963 - KILIMANOOR</div>
+</nav>
+
+<div class="hero">
+<div class="sticker">🛰️</div><br>
+<div class="badge">● LIVE FROM KILIMANOOR</div>
+<h1>From a small fishing village<br><span>to the stars</span></h1>
+<p style="color:#9aa0b8;">Thumba, Kerala - Where India's space story began in a church in 1963. From Kilimanoor to orbit.</p>
+<p style="color:#5a6480; letter-spacing:2px; font-size:13px; margin-top:20px;">KILIMANOOR -> THUMBA -> LEO -> MOON -> MARS</p>
+</div>
+
+<div class="container">
+<div class="grid">
+<div class="card">
+<h2>Gaganyaan</h2>
+<p id="days">loading...</p>
+<p style="font-size:12px;color:#666;margin-top:6px;">Target window 2027 - calculated from local date</p>
+</div>
+<div class="card">
+<h2>ISS Live</h2>
+<p id="issBox">loading...</p>
+<p style="font-size:12px;color:#666;margin-top:6px;">Tracker with fallback</p>
+</div>
+</div>
+
+<div class="card">
+<h2>Mission Control - Kilimanoor Builder</h2>
+<p style="color:#9aa0b8;font-size:14px;">Enter commander name and launch from Thumba</p>
+<input id="nameBox" placeholder="Commander name">
+<button onclick="launch()">LAUNCH</button>
+<div id="out" style="display:none; margin-top:18px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;"></div>
+<div id="launchCount" style="font-size:12px;color:#666;margin-top:10px;"></div>
+</div>
+
+<!-- SPACE MISSION SELECTOR -->
+
+<div class="feature-card">
+  <div class="feature-title">MISSION DATABASE</div>
+  <h2>🛰️ Explore Indian Space Missions</h2>
+  <p style="color:#9aa0b8">
+    Select a mission to explore India's achievements in space.
+  </p>
+
+  <select id="missionSelect" onchange="showMission()">
+    <option value="gaganyaan">Gaganyaan</option>
+    <option value="chandrayaan">Chandrayaan-3</option>
+    <option value="mangalyaan">Mangalyaan</option>
+    <option value="aditya">Aditya-L1</option>
+    <option value="aryabhata">Aryabhata</option>
+  </select>
+
+  <div id="missionInfo">
+    Loading mission...
+  </div>
+</div>
+
+
+<!-- SOLAR SYSTEM EXPLORER -->
+
+<div class="feature-card">
+  <div class="feature-title">INTERACTIVE SOLAR SYSTEM</div>
+  <h2>🪐 Explore the Planets</h2>
+  <p style="color:#9aa0b8;font-size:13px">
+    Click any planet to discover its secrets!
+  </p>
+
+  <div style="text-align:center;line-height:2.5">
+    <span class="planet" onclick="showPlanet('Mercury')">☿️</span>
+    <span class="planet" onclick="showPlanet('Venus')">🟡</span>
+    <span class="planet" onclick="showPlanet('Earth')">🌍</span>
+    <span class="planet" onclick="showPlanet('Mars')">🔴</span>
+    <span class="planet" onclick="showPlanet('Jupiter')">🟠</span>
+    <span class="planet" onclick="showPlanet('Saturn')">🪐</span>
+    <span class="planet" onclick="showPlanet('Uranus')">🔵</span>
+    <span class="planet" onclick="showPlanet('Neptune')">🔵</span>
+  </div>
+
+  <div id="planetInfo">
+    Choose a planet above!
+  </div>
+</div>
+
+
+<!-- SPACE QUIZ -->
+
+<div class="feature-card">
+  <div class="feature-title">ASTRONAUT TRAINING PROGRAM</div>
+  <h2>🧑‍🚀 Space Knowledge Challenge</h2>
+
+  <p id="quizQuestion">Ready for astronaut training?</p>
+
+  <div id="quizOptions"></div>
+
+  <p id="quizResult"></p>
+
+  <button onclick="startQuiz()">START / RESTART QUIZ</button>
+
+  <p id="quizScore"
+     style="color:#7aa2ff;font-size:13px">
+     Your score: 0
+  </p>
+</div>
+
+
+<!-- DAILY SPACE DISCOVERY -->
+
+<div class="feature-card">
+  <div class="feature-title">DAILY SPACE DISCOVERY</div>
+  <h2>🌌 Did You Know?</h2>
+
+  <p id="spaceFact" style="color:#b8c5ed;line-height:1.8">
+    Loading today's discovery...
+  </p>
+
+  <button onclick="newFact()">DISCOVER ANOTHER FACT</button>
+</div>
+
+
+<div class="grid">
+<div class="card">
+<h2>Origin - 1963</h2>
+<p style="color:#9aa0b8;font-size:14px;">First sounding rocket from Thumba. St. Mary Magdalene Church served as the first office. Bullock carts and bicycles were used to transport parts.</p>
+<button onclick="this.nextElementSibling.style.display='block'">Show Details</button>
+<p style="display:none;color:#7aa2ff;font-size:13px;margin-top:10px;">The church in Thumba was the first ISRO office - the altar became the design lab.</p>
+</div>
+<div class="card">
+<h2>Chandrayaan-3</h2>
+<p style="color:#9aa0b8;font-size:14px;">23 Aug 2023 - Successful south pole landing.</p>
+<p id="chandraDays" style="color:#666;font-size:12px;"></p>
+</div>
+</div>
+
+<div class="card">
+<h2>Timeline</h2>
+<p>1963 - Thumba first rocket</p>
+<p>1969 - ISRO formed</p>
+<p>1975 - Aryabhata</p>
+<p>2013 - Mangalyaan</p>
+<p>2023 - Chandrayaan-3</p>
+<p>2027 - Gaganyaan target</p>
+<p id="myNote" style="color:hsl(222, 85%, 69%);font-size:13px;margin-top:10px;"></p>
+</div>
+
+<div class="grid">
+<div class="card">
+<h2>NASA Pic Today</h2>
+<div id="apodBox">loading nasa pic...</div>
+</div>
+<div class="card">
+<h2>Thumba Story</h2>
+<iframe width="100%" height="180" src="https://www.youtube.com/embed/WeA7edXsU40" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>
+<p style="font-size:11px;color:#666;margin-top:8px;">README: https://raw.githubusercontent.com/Mireya-examclarity/thumba-to-space-final-5/main/README.md</p>
+</div>
+</div>
+
+<div class="card">
+<h2>Raw README</h2>
+<p style="font-size:12px;color:#888;">Fetched from raw.githubusercontent.com</p>
+<pre id="readmeBox" style="font-size:11px;color:#9aa0b8;white-space:pre-wrap;background:#12131c;padding:10px;border-radius:8px;max-height:150px;overflow:auto;">loading readme...</pre>
+</div>
+</div>     
+
+<div style="text-align:center; padding:30px; color:#555; font-size:13px;">
+Made by Advika from Kilimanoor<br>
+<a href="https://raw.githubusercontent.com/Mireya-examclarity/thumba-to-space-final-5/main/README.md" style="color:#7aa2ff;font-size:11px;">Raw README Link</a>
+</div>
+
+<script>
+
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas()
+{ canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;}
+
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let stars = [];
+
+// 120 performs well on low-end devices, 150 caused frame drops
+
+for(let i=0;i<120;i++){
+  stars.push({
+  x: Math.random()*canvas.width,
+  y: Math.random()*canvas.height,
+  r: Math.random()*1.1 + 0.2,
+  speed: Math.random()*0.3 + 0.1});}
+
+
+function draw()
+  {ctx.fillStyle = "#080a12";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let s of stars)
+   { ctx.fillStyle = "white";
+    ctx.globalAlpha = 0.3 + Math.sin(Date.now()*0.001 + s.x)*0.7;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+    s.y += s.speed;
+    if(s.y > canvas.height)
+     { s.y = 0;
+      s.x = Math.random()*canvas.width;}}
+    
+  requestAnimationFrame(draw);}
+
+draw();
+
+// countdown to Gaganyaan target date
+
+let launchDate = new Date("2027-03-01");
+let diff = launchDate - new Date();
+let diffDays = Math.ceil(diff / (1000*60*60*24));
+let daysEl = document.getElementById("days");
+if(diffDays <= 0)
+{daysEl.innerText = "Awaiting ISRO update";}
+ else 
+ {daysEl.innerText = diffDays + " days to target";}
+
+
+// days since Chandrayaan-3 landing
+
+let chandra = new Date("2023-08-23");
+let daysSince = Math.floor((new Date() - chandra)/(1000*60*60*24));
+document.getElementById("chandraDays").innerText = daysSince + " days since landing";
+document.getElementById("myNote").innerText = "Kilimanoor is 45km from Thumba - tracking distance from home to launch site.";
+
+let launchCount = Number(localStorage.getItem("launchCount") || 0);
+document.getElementById("launchCount").innerText = "Total launches: " + launchCount;
+
+function launch()
+{ let box = document.getElementById("nameBox");
+  let name = box.value.trim() || "Explorer from Kilimanoor";
+
+  let rocket = document.getElementById("rocketLaunch");
+  rocket.style.display = "block";
+  rocket.classList.remove("launch-active"); 
+
+  // force reflow so animation restarts
+
+  void rocket.offsetHeight;
+  rocket.classList.add("launch-active");
+
+  launchCount++;
+  localStorage.setItem("launchCount", launchCount);
+  document.getElementById("launchCount").innerText = "Total launches: " + launchCount;
+
+  let out = document.getElementById("out");
+  out.style.display = "block";
+  out.replaceChildren();
+
+  let title = document.createElement("b");
+  title.innerText = "Commander " + name + " launched!";
+  out.appendChild(title);
+
+  // route built with DOM nodes to avoid innerHTML
+
+  let route = ["Kilimanoor (Home)", "Thumba (1963 Church)", "LEO", "Moon", "Mars"];
+  route.forEach((step, i)=>{
+    let stepEl = document.createElement("div");
+    stepEl.innerText = step;
+    stepEl.style.marginTop = "6px";
+    stepEl.style.fontSize = "13px";
+    out.appendChild(stepEl);
+    if(i < route.length - 1)
+    
+   { let arrow = document.createElement("div");
+    arrow.innerText = "↓";
+    arrow.style.color = "#555";
+    arrow.style.fontSize = "11px";
+    out.appendChild(arrow);}});
+
+let status = document.createElement("div");
+status.innerText = "STATUS: NOMINAL - Launch #" + launchCount;
+status.style.color = "#7aa2ff";
+status.style.marginTop = "12px";
+status.style.fontSize = "12px";
+out.appendChild(status);
+
+setTimeout(()=>{ rocket.style.display = "none"; }, 2600);}
+
+
+// fetch README from raw github
+
+fetch("https://raw.githubusercontent.com/Mireya-examclarity/thumba-to-space-final-5/main/README.md")
+.then(r=>{
+  if(!r.ok) throw new Error(r.status);
+  return r.text();})
+
+.then(t=>{document.getElementById("readmeBox").innerText = t.substring(0,800);})
+
+.catch(()=>{document.getElementById("readmeBox").innerText = "Failed to load README. Verify file exists in main branch.";});
+
+
+// NASA APOD with HTTP error handling
+
+fetch("https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+.then(r=>
+  {if(!r.ok) throw new Error(r.status);
+  return r.json();})
+
+.then(j=>
+ { let box = document.getElementById("apodBox");
+  if(box && j.url)
+   { box.replaceChildren();
+    let title = document.createElement("b");
+    title.innerText = j.title;
+    let img = document.createElement("img");
+    img.src = j.url;
+    img.style.width = "100%";
+    img.style.borderRadius = "10px";
+    img.style.marginTop = "8px";
+    box.appendChild(title);
+    box.appendChild(img);}})
+  
+.catch(()=>{let box = document.getElementById("apodBox");
+  box.innerHTML = "<img src='https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=400' style='width:100%;border-radius:10px'><p style='font-size:11px;color:#666'>Fallback image - NASA DEMO_KEY rate limit</p>";}); 
+
+
+// ISS tracker - show simulated values clearly labeled, then try live
+
+let issBox = document.getElementById("issBox");
+let simLat = (8.5 + Math.random()*2).toFixed(2);
+let simLon = (76.9 + Math.random()*2).toFixed(2);
+issBox.innerText = simLat + ", " + simLon + " | 27,600 km/h (simulated)";
+let simLabel = document.createElement("div");
+simLabel.innerText = "Simulated near Kerala - attempting live fetch";
+simLabel.style.fontSize = "11px";
+simLabel.style.color = "#666";
+issBox.appendChild(simLabel);
+
+fetch("https://api.wheretheiss.at/v1/satellites/25544")
+
+.then(r=>{if(!r.ok) throw new Error(r.status);
+  return r.json();})
+
+.then(j=>
+
+ { issBox.innerText = j.latitude.toFixed(2) + ", " + j.longitude.toFixed(2) + " | " + j.velocity.toFixed(0) + " km/h";
+  let liveLabel = document.createElement("div");
+  liveLabel.innerText = "Live tracked";
+  liveLabel.style.fontSize = "11px";
+  liveLabel.style.color = "#666";
+  issBox.appendChild(liveLabel);})
+
+
+.catch(()=>{});
+
+
+// =================================
+//  FEATURE 1: MISSION DATABASE
+// =================================
+
+const missions = {
+  gaganyaan: {
+    name: "Gaganyaan 🇮🇳",
+    year: "Target: 2027",
+    description:
+      "India's human spaceflight programme. It aims to send Indian astronauts into low Earth orbit and safely return them."
+  },
+
+  chandrayaan: {
+    name: "Chandrayaan-3 🌙",
+    year: "23 August 2023",
+    description:
+      "India successfully landed Vikram on the Moon and deployed Pragyan rover near the lunar south polar region."
+  },
+
+  mangalyaan: {
+    name: "Mars Orbiter Mission 🔴",
+    year: "2013",
+    description:
+      "India's first interplanetary mission. Mangalyaan successfully entered Mars orbit in 2014."  },
+
+
+  aditya: {
+    name: "Aditya-L1 ☀️",
+    year: "2023",
+    description:
+      "Aditya-L1 is India's first solar mission. It helps scientists study the Sun."},
+
+  aryabhata: {
+    name: "Aryabhata 🛰️",
+    year: "1975",
+    description:
+      "India's first satellite, named after the famous mathematician and astronomer."  }};
+
+
+
+function showMission() {
+  const selected =
+    document.getElementById("missionSelect").value;
+
+  const mission = missions[selected];
+
+  document.getElementById("missionInfo").innerHTML = `
+    <h3 style="color:#a78bfa">${mission.name}</h3>
+    <p style="color:#7aa2ff">${mission.year}</p>
+    <p style="color:#b8c5ed;line-height:1.8">
+      ${mission.description}
+    </p>
+  `;}
+
+
+showMission();
+
+
+// =================================
+//  FEATURE 2: PLANET EXPLORER
+// =================================
+
+const planets = {
+  Mercury:
+    "Mercury is the closest planet to the Sun. A year there lasts just 88 Earth days.",
+
+  Venus:
+    "Venus is the hottest planet in our solar system because of its thick atmosphere.",
+
+  Earth:
+    "Earth is our home planet and the only world currently known to support life.",
+
+  Mars:
+    "Mars is called the Red Planet. Scientists are investigating whether ancient life once existed there.",
+
+  Jupiter:
+    "Jupiter is the largest planet in our solar system. Its Great Red Spot is a giant storm.",
+
+  Saturn:
+    "Saturn is famous for its spectacular rings made mostly of ice and rocky material.",
+
+  Uranus:
+    "Uranus rotates on its side, making its seasons particularly unusual.",
+
+  Neptune:
+    "Neptune is the most distant major planet from the Sun and has extremely powerful winds."};
+
+
+function showPlanet(name) {
+  document.getElementById("planetInfo").innerHTML =
+    `<h3>${name}</h3><p>${planets[name]}</p>`;}
+
+
+
+// =================================
+// FEATURE 3: SPACE QUIZ PART
+// =================================
+
+const questions = [
+  {
+    q: "Which was India's first satellite?",
+    options: ["Aryabhata", "Rohini", "INSAT-1A", "Chandrayaan-1"],
+    answer: 0  },
+
+  {
+    q: "Which planet is known as the Red Planet?",
+    options: ["Venus", "Mars", "Jupiter", "Mercury"],
+    answer: 1  },
+
+  {
+    q: "When did Chandrayaan-3 land on the Moon?",
+    options: ["2019", "2020", "2023", "2024"],
+    answer: 2  },
+
+  {
+    q: "What does ISRO stand for?",
+    options: [
+      "Indian Space Research Organisation",
+      "International Space Rocket Office",
+      "Indian Satellite Research Office",
+      "Indian Science Rocket Organisation"
+    ],
+    answer: 0  },
+
+  {
+    q: "Which mission studies the Sun?",
+    options: ["Mangalyaan", "Aditya-L1", "Aryabhata", "Gaganyaan"],
+    answer: 1  }];
+
+
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function startQuiz() {
+  currentQuestion = 0;
+  score = 0;
+  answered = false;
+
+  document.getElementById("quizScore").innerText =
+    "Your score: 0";
+
+  document.getElementById("quizResult").innerText = "";
+
+  displayQuestion();}
+
+
+function displayQuestion() {
+  const q = questions[currentQuestion];
+
+  document.getElementById("quizQuestion").innerText =
+    `Question ${currentQuestion + 1}/${questions.length}: ${q.q}`;
+
+  const optionsBox =
+    document.getElementById("quizOptions");
+
+  optionsBox.replaceChildren();
+
+  q.options.forEach((option, index) => {
+    const btn = document.createElement("button");
+
+    btn.className = "quiz-option";
+    btn.innerText = option;
+
+    btn.onclick = () => checkAnswer(index);
+
+    optionsBox.appendChild(btn);  });}
+
+
+
+function checkAnswer(index) {
+  if (answered) return;
+
+  answered = true;
+
+  const correct =
+    questions[currentQuestion].answer === index;
+
+  if (correct) {
+    score++;
+    document.getElementById("quizResult").innerText =
+      "🎉 Correct! Excellent astronaut!"; }
+  else {
+    document.getElementById("quizResult").innerText =
+      "❌ Not quite! Keep exploring."; }
+
+ 
+  document.getElementById("quizScore").innerText =
+    "Your score: " + score;
+
+  const buttons =
+    document.querySelectorAll(".quiz-option");
+
+  buttons.forEach((button, i) => {
+    button.disabled = true;
+
+    if (i === questions[currentQuestion].answer) {
+      button.style.borderColor = "#62d99b";    }  });
+
+  const next = document.createElement("button");
+
+  next.innerText =
+    currentQuestion === questions.length - 1
+      ? "SEE FINAL RESULT"
+      : "NEXT QUESTION →";
+
+  next.style.marginTop = "12px";
+
+  next.onclick = nextQuestion;
+
+  document.getElementById("quizOptions")
+    .appendChild(next);}   
+
+
+function nextQuestion() {
+  currentQuestion++;
+
+  if (currentQuestion < questions.length) {
+    answered = false;
+    document.getElementById("quizResult").innerText = "";
+    displayQuestion();
+    return;  }
+
+
+  document.getElementById("quizQuestion").innerText =
+    "🚀 Mission Complete!";
+
+  document.getElementById("quizOptions").replaceChildren();
+
+  let rank = "Space Cadet";
+
+  if (score === 5) rank = "Legendary Astronaut 🏆";
+  else if (score >= 3) rank = "Mission Specialist 🧑‍🚀";
+
+  document.getElementById("quizResult").innerText =
+    `You scored ${score}/5. Your rank: ${rank}`;}
+
+
+
+
+// =================================
+//  FEATURE 4: RANDOM SPACE FACTS
+// =================================
+
+const spaceFacts = [
+  "A day on Venus is longer than its year.",
+
+  "Neutron stars are incredibly dense. A small amount of their material would have an enormous mass.",
+
+  "The Sun contains more than 99% of the mass of our solar system.",
+
+  "The Moon is slowly moving away from Earth at about 3.8 cm per year.",
+
+  "Jupiter has dozens of confirmed moons.",
+
+  "The footprints left by Apollo astronauts can remain on the Moon for millions of years.",
+
+  "Space is not completely empty. It contains gas, dust, radiation and magnetic fields.",
+
+  "A year on Neptune lasts about 165 Earth years.",
+
+  "The International Space Station travels around Earth roughly every 90 minutes."];
+
+
+function newFact() {
+  const fact =
+    spaceFacts[Math.floor(Math.random() * spaceFacts.length)];
+
+  document.getElementById("spaceFact").innerText =
+    "✨ " + fact;}
+
+
+newFact();
+
+
+// =================================
+// FEATURE 5: LAUNCH CELEBRATION
+// =================================
+
+// extra effects after the rocket launches
+
+const originalLaunch = launch;
+
+launch = function() {
+  originalLaunch();
+
+  document.getElementById("out").scrollIntoView({
+    behavior: "smooth",
+    block: "center"  });
+
+
+  const rocket =
+    document.getElementById("rocketLaunch");
+
+  rocket.style.filter =
+    "drop-shadow(0 0 20px #7aa2ff)";};
+
+
+</script>
+</body>
+</html>
+
